@@ -7,8 +7,10 @@ let polygonPoints = [];
 let polygonPointMarkers = []; // 다각형 점 마커들
 let searchMarkers = []; // 검색 관련 마커들 (중심점, 반경 원 등)
 
-// API 기본 URL
-const API_BASE = 'http://localhost:8000/api';
+// API 기본 URL - 환경에 따라 자동 설정
+const API_BASE = window.location.hostname === 'localhost' 
+    ? 'http://localhost:8000/api' 
+    : `${window.location.protocol}//${window.location.hostname.replace('seismic-frontend', 'seismic-backend')}/api`;
 
 // 지도 초기화
 function initMap() {
