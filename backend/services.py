@@ -8,6 +8,56 @@ import json
 class EarthquakeService:
     def __init__(self, db_conn):
         self.db = db_conn
+        self._ensure_tables_exist()
+
+    def _ensure_tables_exist(self):
+        """테이블이 존재하지 않으면 생성"""
+        try:
+            with self.db.cursor() as cursor:
+                # 테이블 존재 확인
+                cursor.execute("""
+                    SELECT EXISTS (
+                        SELECT FROM information_schema.tables 
+                        WHERE table_name = 'earthquakes'
+                    );
+                """)
+                table_exists = cursor.fetchone()[0]
+                
+                if not table_exists:
+                    print("earthquakes 테이블이 없음. 생성 중...")
+                    
+                    # PostGIS 확장 활성화
+                    cursor.execute("CREATE EXTENSION IF NOT EXISTS postgis;")
+                    cursor.execute("CREATE EXTENSION IF NOT EXISTS postgis_topology;")
+                    
+                    # 지진 데이터 테이블 생성
+                    cursor.execute("""
+                        CREATE TABLE earthquakes (
+                            id VARCHAR(50) PRIMARY KEY,
+                            magnitude DECIMAL(5,2),
+                            place VARCHAR(500),
+                            time TIMESTAMP WITH TIME ZONE,
+                            updated TIMESTAMP WITH TIME ZONE,
+                            depth DECIMAL(6,2),
+                            location GEOGRAPHY(POINT, 4326),
+                            url TEXT,
+                            detail TEXT,
+                            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+                        );
+                    """)
+                    
+                    # 인덱스 생성
+                    cursor.execute("CREATE INDEX idx_earthquakes_location ON earthquakes USING GIST(location);")
+                    cursor.execute("CREATE INDEX idx_earthquakes_time ON earthquakes(time);")
+                    cursor.execute("CREATE INDEX idx_earthquakes_magnitude ON earthquakes(magnitude);")
+                    cursor.execute("CREATE INDEX idx_earthquakes_depth ON earthquakes(depth);")
+                    
+                    self.db.commit()
+                    print("earthquakes 테이블 생성 완료!")
+                    
+        except Exception as e:
+            print(f"테이블 생성 오류: {str(e)}")
+            # 오류가 발생해도 계속 진행
 
     def get_earthquakes(self, limit: int = 100, min_magnitude: Optional[float] = None) -> List[EarthquakeResponse]:
         """전체 지진 목록 조회"""
