@@ -830,18 +830,30 @@ async function showStats() {
                 </div>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div class="text-center bg-white rounded-lg p-4 shadow-sm">
+                        <div class="flex items-center justify-center mb-2">
+                            <i class="fas fa-circle text-green-500 text-sm"></i>
+                        </div>
                         <p class="text-sm text-gray-600">규모 0-2</p>
                         <p class="text-xl font-bold text-green-600">미세</p>
                     </div>
                     <div class="text-center bg-white rounded-lg p-4 shadow-sm">
+                        <div class="flex items-center justify-center mb-2">
+                            <i class="fas fa-circle text-yellow-500 text-sm"></i>
+                        </div>
                         <p class="text-sm text-gray-600">규모 2-4</p>
                         <p class="text-xl font-bold text-yellow-600">약함</p>
                     </div>
                     <div class="text-center bg-white rounded-lg p-4 shadow-sm">
+                        <div class="flex items-center justify-center mb-2">
+                            <i class="fas fa-circle text-orange-500 text-sm"></i>
+                        </div>
                         <p class="text-sm text-gray-600">규모 4-6</p>
                         <p class="text-xl font-bold text-orange-600">보통</p>
                     </div>
                     <div class="text-center bg-white rounded-lg p-4 shadow-sm">
+                        <div class="flex items-center justify-center mb-2">
+                            <i class="fas fa-circle text-red-500 text-sm"></i>
+                        </div>
                         <p class="text-sm text-gray-600">규모 6+</p>
                         <p class="text-xl font-bold text-red-600">강함</p>
                     </div>
