@@ -10,7 +10,7 @@ let searchMarkers = []; // 검색 관련 마커들 (중심점, 반경 원 등)
 // API 기본 URL - 환경에 따라 자동 설정
 const API_BASE = window.location.hostname === 'localhost' 
     ? 'http://localhost:8000/api' 
-    : `${window.location.protocol}//${window.location.hostname.replace('seismic-frontend', 'seismic-backend')}/api`;
+    : 'https://seismic-backend-ufeh.onrender.com/api';
 
 // 지도 초기화
 function initMap() {
