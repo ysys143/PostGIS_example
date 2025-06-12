@@ -247,8 +247,8 @@ function addEarthquakeMarkers(earthquakes) {
         const markerColor = magnitudeToColor(magnitude);
         const visualMarker = L.circleMarker([eq.latitude, pacificLng], {
             radius: visualSize,
-            fillColor: markerColor,
-            color: markerColor,
+            fillColor: 'red',
+            color: 'darkred',
             weight: 1,
             opacity: 1,
             fillOpacity: 0.9
@@ -283,8 +283,11 @@ function addEarthquakeMarkers(earthquakes) {
             distanceInfo = '';
         }
         
-        // 팝업 헤더 배경도 동일한 그라데이션 사용
-        const bgColor = markerColor;
+        // 규모에 따른 색상
+        let bgColor = '#16a34a';
+        if (magnitude >= 6.0) bgColor = '#dc2626';
+        else if (magnitude >= 4.0) bgColor = '#ea580c';
+        else if (magnitude >= 2.0) bgColor = '#ca8a04';
         
         // 팝업 내용 - 극도로 컴팩트하게, 요청된 형식으로 재구성
         const popupContent = `
@@ -638,13 +641,19 @@ async function radiusSearch() {
         showCenterMarker(lat, pacificLon, lon);
         
         // 검색 입력 필드 비활성화 (고정)
-        ['search-lat', 'search-lon', 'search-radius'].forEach(id => {
+        ['search-lat', 'search-lon'].forEach(id => {
             const el = document.getElementById(id);
             if (el) {
                 el.disabled = true;
                 el.classList.add('bg-gray-100', 'cursor-not-allowed');
             }
         });
+        const radiusSlider = document.getElementById('search-radius');
+        if (radiusSlider) {
+            radiusSlider.value = '1000';
+            radiusSlider.disabled = false;
+            radiusSlider.classList.remove('range-fake-disabled', 'bg-gray-100', 'cursor-not-allowed');
+        }
         
         // 반경에 따라 더 넓은 영역은 더 낮은 줌레벨로
         let zoomLevel;
@@ -883,18 +892,20 @@ function clearRadiusSearch() {
     hideSearchResults();
     
     // 입력 필드 초기화 및 재활성화
-    ['search-lat', 'search-lon', 'search-radius'].forEach(id => {
+    ['search-lat', 'search-lon'].forEach(id => {
         const el = document.getElementById(id);
         if (el) {
-            if (id === 'search-radius') {
-                el.value = '1000';
-            } else {
-                el.value = '';
-            }
+            el.value = '';
             el.disabled = false;
             el.classList.remove('bg-gray-100', 'cursor-not-allowed');
         }
     });
+    const radiusSlider = document.getElementById('search-radius');
+    if (radiusSlider) {
+        radiusSlider.value = '1000';
+        radiusSlider.disabled = false;
+        radiusSlider.classList.remove('range-fake-disabled', 'bg-gray-100', 'cursor-not-allowed');
+    }
     
     console.log('반경 검색이 해제되었습니다.');
 }

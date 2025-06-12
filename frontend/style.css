@@ -236,14 +236,17 @@ input[type=number] {
 
 /* ===== 전문가용 툴 스타일 (ArcGIS/CARTO/IDE) ===== */
 .sidebar {
-    width: 260px;
-    background: #f7f7fa;
-    border-right: 1px solid #e5e7eb;
+    width: var(--sidebar-width);
+    background: var(--color-bg);
+    border-right: var(--border);
+    box-shadow: var(--shadow);
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    padding: 16px 0;
+    gap: var(--panel-gap);
+    padding: 0 !important;
     min-height: 100vh;
+    margin-top: 0 !important;
+    top: 0 !important;
 }
 .main-content {
     flex: 1;
@@ -278,20 +281,35 @@ input:focus, select:focus {
     background: #fff;
 }
 button {
-    background: #444;
-    color: #fff;
+    background: #444 !important;
+    color: #fff !important;
     font-weight: 500;
-    transition: background 0.15s;
-    border: 1px solid #e5e7eb;
+    border: var(--border);
+    border-radius: var(--radius);
+    transition: background 0.15s, color 0.15s;
+    box-shadow: none;
+    cursor: pointer;
+    min-width: 0;
 }
-button.primary {
-    background: #1976d2;
+button.primary,
+button:not(:disabled):not(.disabled) {
+    background: var(--color-key) !important;
+    color: #fff !important;
+    border: 1.5px solid var(--color-key-hover) !important;
 }
-button:hover {
+button:disabled, .disabled {
+    background: var(--color-disabled) !important;
+    color: var(--color-disabled-text) !important;
+    border: 1.5px solid var(--color-disabled-border) !important;
+    cursor: not-allowed;
+    opacity: 1;
+    box-shadow: none !important;
+}
+button:hover:not(:disabled) {
     background: #222;
 }
-button.primary:hover {
-    background: #145ea8;
+button.primary:hover:not(:disabled) {
+    background: var(--color-key-hover);
 }
 /* 슬라이더 */
 input[type=range] {
@@ -447,6 +465,9 @@ input[type=number] {
   --section-gap: 24px;
   --anchor-width: 3px;
   --step-indicator-size: 18px;
+  --color-disabled: #d1cfc9;         /* 더 진한 연회색 */
+  --color-disabled-text: #4b4b4b;    /* 거의 검정에 가까운 진회색 */
+  --color-disabled-border: #b8b6b0;  /* 테두리용 */
 }
 
 body {
@@ -458,15 +479,8 @@ body {
 }
 
 .sidebar {
-  width: var(--sidebar-width);
-  background: var(--color-bg);
-  border-right: var(--border);
-  box-shadow: var(--shadow);
-  display: flex;
-  flex-direction: column;
-  gap: var(--panel-gap);
-  padding: var(--panel-padding) 0;
-  min-height: 100vh;
+  padding: 0 !important;
+  gap: 8px !important;
 }
 
 .main-content {
@@ -520,7 +534,6 @@ input, button, select {
   font-size: 15px;
   padding: 0 var(--grid);
   height: 32px;
-  transition: border 0.15s, box-shadow 0.15s;
 }
 input:focus, select:focus {
   outline: 2px solid var(--color-key);
@@ -528,8 +541,8 @@ input:focus, select:focus {
 }
 
 button {
-  background: #444;
-  color: #fff;
+  background: #444 !important;
+  color: #fff !important;
   font-weight: 500;
   border: var(--border);
   border-radius: var(--radius);
@@ -538,21 +551,21 @@ button {
   cursor: pointer;
   min-width: 0;
 }
-button.primary {
-  background: var(--color-key);
-  color: #fff;
+
+button.primary,
+button:not(:disabled):not(.disabled) {
+  background: var(--color-key) !important;
+  color: #fff !important;
+  border: 1.5px solid var(--color-key-hover) !important;
 }
+
 button:disabled, .disabled {
   background: var(--color-disabled) !important;
-  color: #fff !important;
+  color: var(--color-disabled-text) !important;
+  border: 1.5px solid var(--color-disabled-border) !important;
   cursor: not-allowed;
-  opacity: 0.7;
-}
-button.primary:hover:not(:disabled) {
-  background: var(--color-key-hover);
-}
-button:hover:not(:disabled) {
-  background: #222;
+  opacity: 1;
+  box-shadow: none !important;
 }
 
 /* 슬라이더 */
@@ -638,4 +651,260 @@ input[type=number] {
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+/* 비활성화 버튼/입력창 스타일 */
+button:disabled, .disabled, input:disabled, select:disabled {
+  background: var(--color-disabled) !important;
+  color: var(--color-disabled-text) !important;
+  border: 1.5px solid var(--color-disabled-border) !important;
+  cursor: not-allowed;
+  opacity: 1;
+  box-shadow: none !important;
+}
+
+input, button, select {
+  height: 26px !important;
+  font-size: 13px !important;
+  padding: 0 6px !important;
+}
+
+.panel {
+  padding: 8px !important;
+  margin-bottom: 4px !important;
+  gap: 4px !important;
+}
+
+.sidebar {
+  padding: 0 !important;
+  gap: 8px !important;
+}
+
+.panel-title {
+  font-size: 13px !important;
+  margin-bottom: 4px !important;
+  padding-left: calc(var(--anchor-width) + 2px) !important;
+}
+
+.range-fake-disabled {
+  opacity: 0.5;
+  pointer-events: auto; /* 반드시 auto로! */
+  /* 커서도 기본으로 */
+  cursor: pointer;
+}
+
+/* 통계 모달 전체 컴팩트 스타일 */
+#stats-modal .bg-white {
+  border-radius: 8px !important;
+  box-shadow: var(--card-shadow) !important;
+  padding: 0 !important;
+  max-width: 600px !important;
+  max-height: 80vh !important;
+}
+
+/* 통계 모달 헤더 */
+#stats-modal .bg-gradient-to-r {
+  background: var(--color-key) !important;
+  color: #fff !important;
+  border-radius: 8px 8px 0 0 !important;
+  padding: 8px 12px !important;
+}
+
+/* 통계 모달 타이포그래피 통일 */
+
+/* 모달 제목 (헤더) */
+#stats-modal .text-xl {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+}
+
+/* 카드 제목 */
+#stats-modal .text-lg {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: var(--color-key) !important;
+}
+
+/* 카드 부제목/설명 */
+#stats-modal .text-blue-700,
+#stats-modal .text-orange-700,
+#stats-modal .text-purple-700,
+#stats-modal .text-gray-700 {
+  font-size: 11px !important;
+  font-weight: 400 !important;
+  color: #666 !important;
+}
+
+/* 메인 숫자 (큰 통계값) */
+#stats-modal .text-3xl {
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  color: var(--color-key) !important;
+}
+
+/* 보조 숫자 (중간 통계값) */
+#stats-modal .text-2xl {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: var(--color-key) !important;
+}
+
+/* 일반 텍스트 */
+#stats-modal .text-sm {
+  font-size: 11px !important;
+  color: #666 !important;
+  font-weight: 400 !important;
+}
+
+/* 라벨 텍스트 */
+#stats-modal .text-blue-800,
+#stats-modal .text-orange-800,
+#stats-modal .text-purple-800,
+#stats-modal .text-gray-800 {
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  color: #444 !important;
+}
+
+/* 강조 숫자 (색상별) */
+#stats-modal .text-blue-600,
+#stats-modal .text-orange-600,
+#stats-modal .text-purple-600,
+#stats-modal .text-green-600,
+#stats-modal .text-red-600 {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: var(--color-key) !important;
+}
+
+/* 제목 텍스트 (카드 내부) */
+#stats-modal .text-blue-900,
+#stats-modal .text-orange-900,
+#stats-modal .text-purple-900,
+#stats-modal .text-gray-900 {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: #333 !important;
+}
+
+/* 아이콘 텍스트 */
+#stats-modal .text-white {
+  font-size: 10px !important;
+  font-weight: 400 !important;
+}
+
+/* 규모별 분포 카드 내부 텍스트 통일 */
+#stats-modal .bg-white.rounded-lg p {
+  font-size: 11px !important;
+}
+
+#stats-modal .bg-white.rounded-lg .text-xl {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: var(--color-key) !important;
+}
+
+/* 그리드 간격 줄이기 */
+#stats-modal .gap-6 {
+  gap: 8px !important;
+}
+
+#stats-modal .gap-4 {
+  gap: 6px !important;
+}
+
+#stats-modal .gap-3 {
+  gap: 4px !important;
+}
+
+/* 여백 줄이기 */
+#stats-modal .mb-4 {
+  margin-bottom: 6px !important;
+}
+
+#stats-modal .mb-2 {
+  margin-bottom: 4px !important;
+}
+
+#stats-modal .mr-4 {
+  margin-right: 6px !important;
+}
+
+#stats-modal .mr-3 {
+  margin-right: 4px !important;
+}
+
+/* 규모별 분포 카드 */
+#stats-modal .col-span-1.md\\:col-span-2 {
+  grid-column: span 2 !important;
+}
+
+#stats-modal .grid-cols-2.md\\:grid-cols-4 {
+  grid-template-columns: repeat(4, 1fr) !important;
+}
+
+#stats-modal .shadow-sm {
+  box-shadow: none !important;
+  border: 1px solid var(--color-border) !important;
+}
+
+/* 모달 내용 영역 */
+#stats-modal .overflow-y-auto {
+  padding: 8px 12px !important;
+}
+
+/* 닫기 버튼 */
+#stats-modal .close {
+  padding: 4px !important;
+  font-size: 12px !important;
+}
+
+/* 통계 카드들 */
+#stats-modal .rounded-xl {
+  border-radius: 6px !important;
+  box-shadow: none !important;
+  border: 1px solid var(--color-border) !important;
+  background: var(--color-panel) !important;
+  padding: 8px 10px !important;
+  margin-bottom: 6px !important;
+}
+
+#stats-modal .p-6 {
+  padding: 8px 10px !important;
+}
+
+#stats-modal .p-4 {
+  padding: 6px 8px !important;
+}
+
+#stats-modal .p-3 {
+  padding: 4px 6px !important;
+}
+
+/* 카드 헤더 아이콘 */
+#stats-modal .bg-blue-500,
+#stats-modal .bg-orange-500,
+#stats-modal .bg-purple-500,
+#stats-modal .bg-gray-500 {
+  background: var(--color-key) !important;
+  color: #fff !important;
+  border-radius: 4px !important;
+  padding: 4px !important;
+  width: 24px !important;
+  height: 24px !important;
+}
+
+/* 통계 모달 위치 조정 */
+#stats-modal {
+  padding-top: 2vh !important;
+  padding-bottom: 2vh !important;
+}
+
+#stats-modal .flex.items-center.justify-center {
+  align-items: flex-start !important;
+  padding-top: 2vh !important;
+}
+
+#stats-modal .min-h-screen {
+  min-height: auto !important;
 } 
