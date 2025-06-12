@@ -188,21 +188,6 @@ function addPolygonPoint(latlng) {
     }
 }
 
-// 규모에 따라 색상 그라데이션(노랑→빨강)
-function magnitudeToColor(mag) {
-    // 시작색: 짙은 노랑 #facc15 (RGB 250,204,21)
-    // 끝색:   짙은 빨강 #b91c1c (RGB 185,28,28)
-    const start = [250, 204, 21];
-    const end = [185, 28, 28];
-
-    // 0-8 스케일로 정규화 (8 이상이면 1, 0 이하면 0)
-    const t = Math.max(0, Math.min(1, mag / 8));
-
-    const rgb = start.map((s, i) => Math.round(s + (end[i] - s) * t));
-    // RGB를 hex 문자열로 변환
-    return '#' + rgb.map(x => x.toString(16).padStart(2, '0')).join('');
-}
-
 // 마커 추가
 function addEarthquakeMarkers(earthquakes) {
     // 기존 마커 제거
@@ -218,15 +203,14 @@ function addEarthquakeMarkers(earthquakes) {
         const visualSize = Math.max(2, Math.min(10, magnitude*0.8));
         const clickSize = Math.max(8, visualSize * 2); // 클릭 영역을 시각적 크기보다 크게
         
-        // 시각적 마커 (규모별 색상) - 태평양 중심 좌표로 표시
-        const markerColor = magnitudeToColor(magnitude);
+        // 시각적 마커 (작은 빨간 점) - 태평양 중심 좌표로 표시
         const visualMarker = L.circleMarker([eq.latitude, pacificLng], {
             radius: visualSize,
-            fillColor: markerColor,
-            color: markerColor,
+            fillColor: 'red',
+            color: 'darkred',
             weight: 1,
             opacity: 1,
-            fillOpacity: 0.9
+            fillOpacity: 0.8
         });
         
         // 클릭 영역 마커 (투명한 큰 원) - 태평양 중심 좌표로 표시
@@ -243,58 +227,21 @@ function addEarthquakeMarkers(earthquakes) {
         const markerGroup = L.layerGroup([visualMarker, clickMarker]);
         const marker = clickMarker; // 이벤트는 클릭 마커에 붙임
         
-        const fullPlace = eq.place || '';
-        let locationName = fullPlace;
-        let distanceInfo = '';
-
-        // "DISTANCE DIRECTION of LOCATION" 패턴 파싱
-        const ofIndex = fullPlace.indexOf(' of ');
-        if (ofIndex !== -1) {
-            distanceInfo = fullPlace.substring(0, ofIndex).trim();
-            locationName = fullPlace.substring(ofIndex + ' of '.length).trim();
-        } else {
-            // 'of'가 없으면 전체를 지역명으로 간주하고 거리 정보는 비워둠
-            locationName = fullPlace;
-            distanceInfo = '';
-        }
-        
-        // 팝업 헤더 배경도 동일한 그라데이션 사용
-        const bgColor = markerColor;
-        
-        // 팝업 내용 - 극도로 컴팩트하게, 요청된 형식으로 재구성
+        // 팝업 내용 - 원래 좌표로 표시
         const popupContent = `
-            <div style="
-                min-width: 100px; 
-                max-width: 120px; 
-                font-size: 11px; 
-                line-height: 1.2;
-                padding: 4px;
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            ">
-                <div style="
-                    background: ${bgColor}; 
-                    color: white; 
-                    padding: 2px 6px; 
-                    margin: -4px -4px 3px -4px;
-                    font-weight: bold;
-                    font-size: 12px;
-                ">
-                    M${magnitude || '?'}
-                </div>
-                <div style="color: #333; padding: 1px 6px; font-size: 10px; word-wrap: break-word;">
-                    ${locationName || '위치 미상'}
-                </div>
-                <div style="color: #666; padding: 1px 6px; font-size: 9px;">
-                    ${distanceInfo || ''}
-                </div>
+            <div class="earthquake-popup">
+                <h4>규모 ${magnitude}</h4>
+                <p><strong>위치:</strong> ${eq.place || '알 수 없음'}</p>
+                <p><strong>좌표:</strong> ${eq.latitude?.toFixed(4)}, ${eq.longitude?.toFixed(4)}</p>
+                <p><strong>깊이:</strong> ${eq.depth ? eq.depth + 'km' : '알 수 없음'}</p>
+                <p><strong>시간:</strong> ${eq.time ? new Date(eq.time).toLocaleString('ko-KR') : '알 수 없음'}</p>
+                ${eq.distance_km ? `<p><strong>거리:</strong> ${eq.distance_km}km</p>` : ''}
+                ${eq.url ? `<p><a href="${eq.url}" target="_blank">상세 정보</a></p>` : ''}
             </div>
         `;
-
-        clickMarker.bindPopup(popupContent, {
-            closeButton: true,
-            maxWidth: 120,
-            className: 'compact-popup'
-        });
+        
+        // 팝업과 이벤트는 클릭 마커에 붙임
+        marker.bindPopup(popupContent);
         
         // 클릭 이벤트
         marker.on('click', () => {
@@ -384,8 +331,7 @@ function showCenterMarker(lat, displayLon, originalLon) {
             fillColor: '#8B6B3A',
             fillOpacity: 0.1,
             weight: 0.5,
-            radius: radius * 1000, // 미터 단위
-            interactive: false  // 지진 마커 클릭을 방해하지 않도록 설정
+            radius: radius * 1000 // 미터 단위
         }).addTo(map);
         
         // 검색 마커들을 배열에 저장
@@ -399,37 +345,19 @@ function showCenterMarker(lat, displayLon, originalLon) {
     }
 }
 
-// 지진 상세정보 표시
+// 지진 정보 표시
 function showEarthquakeInfo(earthquake) {
+    console.log('showEarthquakeInfo 호출됨:', earthquake.id);
     const infoDiv = document.getElementById('earthquake-info');
-    
-    const timeStr = earthquake.time ? new Date(earthquake.time).toLocaleString('ko-KR', {
-        month: 'numeric',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    }) : '미상';
-    
-    // 규모에 따른 색상
-    let magnitudeColor = 'text-green-600';
-    if (earthquake.magnitude >= 6.0) magnitudeColor = 'text-red-600';
-    else if (earthquake.magnitude >= 4.0) magnitudeColor = 'text-orange-600';
-    else if (earthquake.magnitude >= 2.0) magnitudeColor = 'text-yellow-600';
-    
     infoDiv.innerHTML = `
-        <div class="bg-gray-50 rounded p-1 mb-1">
-            <div class="text-xs">
-                <span class="font-bold ${magnitudeColor}">M${earthquake.magnitude || '?'}</span>
-                <span class="ml-1 text-gray-700 break-words whitespace-normal">${earthquake.place || '위치 미상'}</span>
-            </div>
-        </div>
-        
-        <div class="space-y-0.5 text-xs">
-            <div><span class="text-gray-500">시간:</span> ${timeStr}</div>
-            <div><span class="text-gray-500">좌표:</span> ${earthquake.latitude?.toFixed(1) || '?'}, ${earthquake.longitude?.toFixed(1) || '?'}</div>
-            <div><span class="text-gray-500">깊이:</span> ${earthquake.depth || '?'}km</div>
-            ${earthquake.distance_km ? `<div><span class="text-gray-500">거리:</span> ${earthquake.distance_km}km</div>` : ''}
-        </div>
+        <h4>SEISMIC_EVENT_DATA</h4>
+        <p><strong>EVENT_ID:</strong> ${earthquake.id}</p>
+        <p><strong>MAGNITUDE:</strong> ${earthquake.magnitude || 'UNKNOWN'}</p>
+        <p><strong>LOCATION:</strong> ${earthquake.place || 'UNKNOWN'}</p>
+        <p><strong>COORDINATES:</strong> ${earthquake.latitude?.toFixed(4)}, ${earthquake.longitude?.toFixed(4)}</p>
+        <p><strong>DEPTH_KM:</strong> ${earthquake.depth ? earthquake.depth : 'UNKNOWN'}</p>
+        <p><strong>TIMESTAMP:</strong> ${earthquake.time ? new Date(earthquake.time).toISOString() : 'UNKNOWN'}</p>
+        ${earthquake.distance_km ? `<p><strong>DISTANCE_KM:</strong> ${earthquake.distance_km}</p>` : ''}
     `;
 }
 
@@ -439,91 +367,63 @@ function showSearchResults(earthquakes, searchType) {
     const title = document.getElementById('results-title');
     const resultsList = document.getElementById('results-list');
     
-    title.innerHTML = `
-        <i class="fas fa-search mr-2 text-xs"></i>
-        ${searchType} (${earthquakes.length})
-    `;
+    title.textContent = `${searchType} (${earthquakes.length}개)`;
     
     // 결과 목록 생성
     resultsList.innerHTML = '';
     
-    if (earthquakes.length === 0) {
-        resultsList.innerHTML = `
-            <div class="flex items-center justify-center py-8 text-gray-500">
-                <div class="text-center">
-                    <i class="fas fa-search text-2xl mb-2"></i>
-                    <p class="text-xs">검색 결과 없음</p>
-                </div>
-            </div>
+    earthquakes.forEach(eq => {
+        const item = document.createElement('div');
+        item.className = 'result-item';
+        
+        const timeStr = eq.time ? new Date(eq.time).toLocaleDateString('ko-KR', {
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        }) : '시간 미상';
+        
+        item.innerHTML = `
+            <h5>규모 <span class="magnitude">${eq.magnitude || '미상'}</span></h5>
+            <p class="location">${eq.place || '위치 미상'}</p>
+            <p>깊이: ${eq.depth ? eq.depth + 'km' : '미상'}</p>
+            <p class="time">${timeStr}</p>
+            ${eq.distance_km ? `<p>거리: ${eq.distance_km}km</p>` : ''}
         `;
-    } else {
-        earthquakes.forEach(eq => {
-            const item = document.createElement('div');
-            item.className = 'bg-gray-50 border border-gray-200 rounded p-2 cursor-pointer hover:bg-gray-100 hover:border-blue-300 transition-all duration-200';
+        
+        // 클릭 이벤트 - 상세정보 표시 및 지도 이동
+        item.addEventListener('click', () => {
+            showEarthquakeInfo(eq);
             
-            const timeStr = eq.time ? new Date(eq.time).toLocaleDateString('ko-KR', {
-                month: 'numeric',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            }) : '시간 미상';
+            // 지도 중심 이동 (태평양 중심 좌표로)
+            const pacificLng = toPacificCentricLongitude(eq.longitude);
+            map.setView([eq.latitude, pacificLng], 8);
             
-            // 규모에 따른 색상 지정
-            let magnitudeColor = 'text-green-600';
-            if (eq.magnitude >= 6.0) magnitudeColor = 'text-red-600';
-            else if (eq.magnitude >= 4.0) magnitudeColor = 'text-orange-600';
-            else if (eq.magnitude >= 2.0) magnitudeColor = 'text-yellow-600';
-            
-            item.innerHTML = `
-                <div class="flex justify-between items-start mb-1">
-                    <span class="text-lg font-bold ${magnitudeColor}">
-                        ${eq.magnitude || '?'}
-                    </span>
-                    <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
-                </div>
-                <div class="text-xs text-gray-700 mb-1" title="${eq.place || '위치 미상'}">
-                    ${eq.place || '위치 미상'}
-                </div>
-                <div class="flex justify-between text-xs text-gray-500">
-                    <span>${timeStr}</span>
-                    ${eq.distance_km ? `<span>${eq.distance_km}km</span>` : ''}
-                </div>
-            `;
-            
-            // 클릭 이벤트 - 상세정보 표시 및 지도 이동
-            item.addEventListener('click', () => {
-                showEarthquakeInfo(eq);
-                
-                // 지도 중심 이동 (태평양 중심 좌표로)
-                const pacificLng = toPacificCentricLongitude(eq.longitude);
-                map.setView([eq.latitude, pacificLng], 8);
-                
-                // 해당 마커 강조 (팝업 열기)
-                markers.forEach(markerGroup => {
-                    const layers = markerGroup.getLayers();
-                    if (layers.length > 0) {
-                        const marker = layers[1]; // clickMarker
-                        const markerLatLng = marker.getLatLng();
-                        if (Math.abs(markerLatLng.lat - eq.latitude) < 0.001 && 
-                            Math.abs(markerLatLng.lng - pacificLng) < 0.001) {
-                            marker.openPopup();
-                        }
+            // 해당 마커 강조 (팝업 열기)
+            markers.forEach(markerGroup => {
+                const layers = markerGroup.getLayers();
+                if (layers.length > 0) {
+                    const marker = layers[1]; // clickMarker
+                    const markerLatLng = marker.getLatLng();
+                    if (Math.abs(markerLatLng.lat - eq.latitude) < 0.001 && 
+                        Math.abs(markerLatLng.lng - pacificLng) < 0.001) {
+                        marker.openPopup();
                     }
-                });
+                }
             });
-            
-            resultsList.appendChild(item);
         });
-    }
+        
+        resultsList.appendChild(item);
+    });
     
     // 팝업 표시
-    popup.classList.remove('hidden');
+    popup.style.display = 'block';
 }
 
 // 검색 결과 팝업 숨기기
 function hideSearchResults() {
     const popup = document.getElementById('search-results-popup');
-    popup.classList.add('hidden');
+    popup.style.display = 'none';
 }
 
 // API 호출 함수들
@@ -613,15 +513,6 @@ async function radiusSearch() {
         // 중심점 마커와 반경 원 표시 (태평양 좌표로)
         showCenterMarker(lat, pacificLon, lon);
         
-        // 검색 입력 필드 비활성화 (고정)
-        ['search-lat', 'search-lon', 'search-radius'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) {
-                el.disabled = true;
-                el.classList.add('bg-gray-100', 'cursor-not-allowed');
-            }
-        });
-        
         // 적절한 줌 레벨로 조정 (태평양 좌표로)
         const zoomLevel = radius > 500 ? 5 : radius > 100 ? 7 : radius > 50 ? 8 : 10;
         map.setView([lat, pacificLon], zoomLevel);
@@ -683,135 +574,52 @@ async function polygonSearch() {
     }
 }
 
-// 통계 정보 표시
 async function showStats() {
     try {
-        showLoading('stats-btn');
-        
         const response = await fetch(`${API_BASE}/earthquakes/stats`);
         const stats = await response.json();
         
-        const modal = document.getElementById('stats-modal');
-        const content = document.getElementById('stats-content');
+        document.getElementById('total-count').textContent = stats.total_earthquakes;
+        document.getElementById('recent-count').textContent = stats.recent_24h;
+        document.getElementById('avg-magnitude').textContent = stats.magnitude_stats.average.toFixed(2);
+        document.getElementById('avg-depth').textContent = stats.depth_stats.average.toFixed(1) + ' km';
         
-        content.innerHTML = `
-            <!-- 전체 통계 카드 -->
-            <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
-                <div class="flex items-center mb-4">
-                    <div class="bg-blue-500 rounded-lg p-3 mr-4">
-                        <i class="fas fa-database text-white text-xl"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-semibold text-blue-900">전체 지진 데이터</h3>
-                        <p class="text-blue-700">데이터베이스 현황</p>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="text-center">
-                        <p class="text-3xl font-bold text-blue-600">${stats.total_earthquakes.toLocaleString()}</p>
-                        <p class="text-sm text-blue-700">총 지진 이벤트</p>
-                    </div>
-                    <div class="text-center">
-                        <p class="text-3xl font-bold text-green-600">${stats.recent_24h}</p>
-                        <p class="text-sm text-blue-700">최근 24시간</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 규모 통계 카드 -->
-            <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-6 border border-orange-200">
-                <div class="flex items-center mb-4">
-                    <div class="bg-orange-500 rounded-lg p-3 mr-4">
-                        <i class="fas fa-chart-line text-white text-xl"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-semibold text-orange-900">규모 통계</h3>
-                        <p class="text-orange-700">지진 강도 분석</p>
-                    </div>
-                </div>
-                <div class="space-y-3">
-                    <div class="flex justify-between items-center">
-                        <span class="text-orange-800 font-medium">평균 규모:</span>
-                        <span class="text-2xl font-bold text-orange-600">${stats.magnitude_stats.average.toFixed(2)}</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-orange-800 font-medium">최대 규모:</span>
-                        <span class="text-xl font-bold text-red-600">${stats.magnitude_stats.maximum.toFixed(2)}</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-orange-800 font-medium">최소 규모:</span>
-                        <span class="text-lg font-bold text-green-600">${stats.magnitude_stats.minimum.toFixed(2)}</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 깊이 통계 카드 -->
-            <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200">
-                <div class="flex items-center mb-4">
-                    <div class="bg-purple-500 rounded-lg p-3 mr-4">
-                        <i class="fas fa-arrows-alt-v text-white text-xl"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-semibold text-purple-900">깊이 통계</h3>
-                        <p class="text-purple-700">지진 발생 깊이</p>
-                    </div>
-                </div>
-                <div class="space-y-3">
-                    <div class="flex justify-between items-center">
-                        <span class="text-purple-800 font-medium">평균 깊이:</span>
-                        <span class="text-2xl font-bold text-purple-600">${stats.depth_stats.average.toFixed(1)}km</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-purple-800 font-medium">최대 깊이:</span>
-                        <span class="text-xl font-bold text-red-600">${stats.depth_stats.maximum.toFixed(1)}km</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-purple-800 font-medium">최소 깊이:</span>
-                        <span class="text-lg font-bold text-green-600">${stats.depth_stats.minimum.toFixed(1)}km</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 규모별 분포 카드 -->
-            <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 border border-gray-200 col-span-1 md:col-span-2">
-                <div class="flex items-center mb-4">
-                    <div class="bg-gray-500 rounded-lg p-3 mr-4">
-                        <i class="fas fa-chart-bar text-white text-xl"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-900">규모별 분포</h3>
-                        <p class="text-gray-700">지진 강도별 발생 빈도</p>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="text-center bg-white rounded-lg p-4 shadow-sm">
-                        <p class="text-sm text-gray-600">규모 0-2</p>
-                        <p class="text-xl font-bold text-green-600">미세</p>
-                    </div>
-                    <div class="text-center bg-white rounded-lg p-4 shadow-sm">
-                        <p class="text-sm text-gray-600">규모 2-4</p>
-                        <p class="text-xl font-bold text-yellow-600">약함</p>
-                    </div>
-                    <div class="text-center bg-white rounded-lg p-4 shadow-sm">
-                        <p class="text-sm text-gray-600">규모 4-6</p>
-                        <p class="text-xl font-bold text-orange-600">보통</p>
-                    </div>
-                    <div class="text-center bg-white rounded-lg p-4 shadow-sm">
-                        <p class="text-sm text-gray-600">규모 6+</p>
-                        <p class="text-xl font-bold text-red-600">강함</p>
-                    </div>
-                </div>
-            </div>
-        `;
+        document.getElementById('stats-modal').style.display = 'block';
         
-        modal.classList.remove('hidden');
-        
+        // 간단한 차트 그리기
+        createMagnitudeChart(stats);
     } catch (error) {
-        console.error('통계 조회 오류:', error);
-        alert('통계 정보를 불러오는데 실패했습니다.');
-    } finally {
-        hideLoading('stats-btn');
+        console.error('Error loading stats:', error);
+        alert('ERROR: STATS_LOAD_FAILED');
     }
+}
+
+function createMagnitudeChart(stats) {
+    const ctx = document.getElementById('magnitude-chart').getContext('2d');
+    
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['평균 규모', '최대 규모', '최소 규모'],
+            datasets: [{
+                data: [
+                    stats.magnitude_stats.average,
+                    stats.magnitude_stats.maximum,
+                    stats.magnitude_stats.minimum
+                ],
+                backgroundColor: ['#4f46e5', '#ef4444', '#22c55e']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: '규모 분포'
+                }
+            }
+        }
+    });
 }
 
 function togglePolygonMode() {
@@ -819,20 +627,14 @@ function togglePolygonMode() {
     const btn = document.getElementById('polygon-mode-btn');
     
     if (isPolygonMode) {
-        // 반경 검색이 활성화되어 있었다면 초기화
-        const latInputDisabled = document.getElementById('search-lat')?.disabled;
-        if (latInputDisabled) {
-            clearRadiusSearch();
-        }
-
-        btn.textContent = '완료';
-        btn.classList.add('bg-blue-600');
-        btn.classList.remove('bg-gray-600');
+        btn.textContent = 'COMPLETE_POLYGON';
+        btn.classList.add('btn-primary');
+        btn.classList.remove('btn-secondary');
         map.getContainer().style.cursor = 'crosshair';
     } else {
-        btn.textContent = '그리기';
-        btn.classList.add('bg-gray-600');
-        btn.classList.remove('bg-blue-600');
+        btn.textContent = 'DRAW_POLYGON';
+        btn.classList.add('btn-secondary');
+        btn.classList.remove('btn-primary');
         map.getContainer().style.cursor = '';
     }
 }
@@ -848,19 +650,10 @@ function clearRadiusSearch() {
     // 검색 결과 팝업 숨기기
     hideSearchResults();
     
-    // 입력 필드 초기화 및 재활성화
-    ['search-lat', 'search-lon', 'search-radius'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-            if (id === 'search-radius') {
-                el.value = '1000';
-            } else {
-                el.value = '';
-            }
-            el.disabled = false;
-            el.classList.remove('bg-gray-100', 'cursor-not-allowed');
-        }
-    });
+    // 입력 필드 초기화
+    document.getElementById('search-lat').value = '';
+    document.getElementById('search-lon').value = '';
+    document.getElementById('search-radius').value = '1000';
     
     console.log('반경 검색이 해제되었습니다.');
 }
@@ -888,24 +681,30 @@ function clearPolygon() {
     }
 }
 
-// 로딩 표시
 function showLoading(buttonId) {
-    const button = document.getElementById(buttonId);
-    const originalText = button.innerHTML;
-    button.setAttribute('data-original', originalText);
-    button.innerHTML = '<i class="fas fa-spinner loading-spinner mr-1"></i>로딩';
-    button.disabled = true;
+    const btn = document.getElementById(buttonId);
+    btn.innerHTML = '<span class="loading"></span> 처리중...';
+    btn.disabled = true;
 }
 
-// 로딩 숨기기
 function hideLoading(buttonId) {
-    const button = document.getElementById(buttonId);
-    const originalText = button.getAttribute('data-original');
-    if (originalText) {
-        button.innerHTML = originalText;
-        button.removeAttribute('data-original');
+    const btn = document.getElementById(buttonId);
+    btn.disabled = false;
+    
+    switch(buttonId) {
+        case 'sync-btn':
+            btn.innerHTML = '데이터 동기화';
+            break;
+        case 'load-earthquakes-btn':
+            btn.innerHTML = '지진 조회';
+            break;
+        case 'radius-search-btn':
+            btn.innerHTML = '반경 검색';
+            break;
+        case 'polygon-search-btn':
+            btn.innerHTML = '지역 내 검색';
+            break;
     }
-    button.disabled = false;
 }
 
 // 이벤트 리스너 등록
@@ -922,32 +721,12 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('polygon-clear-btn').addEventListener('click', clearPolygon);
     document.getElementById('stats-btn').addEventListener('click', showStats);
     
-    // 반경 슬라이더 변경 시: 표시 숫자 업데이트 + 마커 업데이트
-    const radiusSlider = document.getElementById('search-radius');
-    const radiusValueSpan = document.getElementById('search-radius-value');
-    radiusSlider.addEventListener('input', () => {
-        radiusValueSpan.textContent = radiusSlider.value;
-        updateCenterMarkerIfValid();
-    });
+    // 반경값 변경시 마커 업데이트
+    document.getElementById('search-radius').addEventListener('input', updateCenterMarkerIfValid);
     
     // 좌표 입력 필드 변경시 마커 업데이트
     document.getElementById('search-lat').addEventListener('input', updateCenterMarkerIfValid);
     document.getElementById('search-lon').addEventListener('input', updateCenterMarkerIfValid);
-    
-    // 최대 표시 개수 슬라이더 표시 숫자 업데이트
-    const maxCountSlider = document.getElementById('max-count');
-    const maxCountValueSpan = document.getElementById('max-count-value');
-    const updateMaxCountDisplay = () => {
-        if (parseInt(maxCountSlider.value) >= parseInt(maxCountSlider.max)) {
-            maxCountValueSpan.textContent = 'MAX';
-        } else {
-            maxCountValueSpan.textContent = maxCountSlider.value;
-        }
-    };
-    // 초기 표시
-    updateMaxCountDisplay();
-
-    maxCountSlider.addEventListener('input', updateMaxCountDisplay);
     
     function updateCenterMarkerIfValid() {
         const lat = parseFloat(document.getElementById('search-lat').value);
@@ -961,22 +740,16 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 모달 닫기
     document.querySelector('.close').addEventListener('click', function() {
-        document.getElementById('stats-modal').classList.add('hidden');
+        document.getElementById('stats-modal').style.display = 'none';
     });
     
     // 검색 결과 팝업 닫기
     document.getElementById('close-results').addEventListener('click', hideSearchResults);
     
-    // 모달 외부 클릭시 닫기
-    document.getElementById('stats-modal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            this.classList.add('hidden');
-        }
-    });
-    
-    document.getElementById('search-results-popup').addEventListener('click', function(e) {
-        if (e.target === this) {
-            hideSearchResults();
+    window.addEventListener('click', function(event) {
+        const modal = document.getElementById('stats-modal');
+        if (event.target === modal) {
+            modal.style.display = 'none';
         }
     });
     
