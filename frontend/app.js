@@ -539,6 +539,10 @@ async function polygonSearch() {
     const wktPoints = polygonPoints.map(p => `${p[1]} ${p[0]}`).join(', ');
     const polygonWkt = `POLYGON((${wktPoints}, ${polygonPoints[0][1]} ${polygonPoints[0][0]}))`;
     
+    // 디버깅: WKT 형식 확인
+    console.log('다각형 WKT:', polygonWkt);
+    console.log('다각형 좌표:', polygonPoints);
+    
     try {
         showLoading('polygon-search-btn');
         
@@ -554,6 +558,8 @@ async function polygonSearch() {
         });
         
         const earthquakes = await response.json();
+        console.log(`다각형 검색 결과: ${earthquakes.length}개`);
+        
         addEarthquakeMarkers(earthquakes);
         
         // 검색 결과 팝업 표시

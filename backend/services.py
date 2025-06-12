@@ -151,8 +151,9 @@ class EarthquakeService:
             ]
 
     def search_within_polygon(self, polygon_wkt: str) -> List[EarthquakeResponse]:
-        """다각형 내 검색"""
+        """다각형 내 검색 - 날짜변경선 처리 개선"""
         with self.db.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
+            # Geography 타입을 사용하여 날짜변경선 문제 해결
             cursor.execute("""
                 SELECT 
                     e.id,
@@ -164,7 +165,7 @@ class EarthquakeService:
                     ST_Y(e.location::geometry) as latitude,
                     ST_X(e.location::geometry) as longitude
                 FROM earthquakes e
-                WHERE ST_Within(e.location::geometry, ST_GeomFromText(%s, 4326))
+                WHERE ST_Covers(ST_GeogFromText(%s), e.location)
             """, (polygon_wkt,))
             
             rows = cursor.fetchall()

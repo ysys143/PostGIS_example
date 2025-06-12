@@ -51,7 +51,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- 지역 내 검색 함수 (다각형 내포 여부)
+-- 지역 내 검색 함수 (다각형 내포 여부) - 날짜변경선 처리 개선
 CREATE OR REPLACE FUNCTION find_earthquakes_within_polygon(polygon_wkt TEXT)
 RETURNS TABLE(
     id VARCHAR,
@@ -69,7 +69,7 @@ BEGIN
         e.time,
         e.depth
     FROM earthquakes e
-    WHERE ST_Within(e.location::geometry, ST_GeomFromText(polygon_wkt, 4326));
+    WHERE ST_Covers(ST_GeogFromText(polygon_wkt), e.location);
 END;
 $$ LANGUAGE plpgsql;
 
