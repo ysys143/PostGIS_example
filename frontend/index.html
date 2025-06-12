@@ -7,6 +7,7 @@
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
@@ -35,11 +36,11 @@
     <!-- 커스텀 스타일 -->
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-gray-50 font-sans antialiased">
+<body class="font-sans antialiased bg-gray-100">
     <!-- 메인 컨테이너 -->
     <div class="flex h-screen overflow-hidden">
         <!-- 사이드바 -->
-        <div class="w-56 bg-white shadow-xl border-r border-gray-200 flex flex-col">
+        <div class="sidebar">
             <!-- 헤더 -->
             <div class="bg-gradient-to-r from-blue-600 to-blue-700 p-2 text-white">
                 <h1 class="text-sm font-bold flex items-center">
@@ -57,42 +58,41 @@
                         데이터 관리
                     </h3>
                     <div class="flex space-x-1">
-                        <button id="sync-btn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-xs py-1 px-2 rounded">
+                        <button id="sync-btn" class="flex-1 primary text-xs py-1 px-2 rounded">
                             동기화
                         </button>
-                        <button id="stats-btn" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white text-xs py-1 px-2 rounded">
+                        <button id="stats-btn" class="flex-1 text-xs py-1 px-2 rounded">
                             통계
                         </button>
                     </div>
                 </div>
 
                 <!-- 반경 검색 -->
-                <div class="bg-white rounded border border-gray-200 p-2">
-                    <h3 class="text-xs font-semibold text-gray-800 mb-1 flex items-center">
-                        <i class="fas fa-crosshairs mr-1 text-green-600 text-xs"></i>
-                        반경 검색
+                <div class="panel">
+                    <h3 class="panel-title">
+                        [반경] 검색
                     </h3>
                     <div class="space-y-1">
-                        <div class="grid grid-cols-3 gap-1">
+                        <div class="grid grid-cols-2 gap-1">
                             <input type="number" id="search-lat" 
                                    class="w-full px-1 py-0.5 text-xs border border-gray-300 rounded"
                                    placeholder="위도" step="0.01">
                             <input type="number" id="search-lon" 
                                    class="w-full px-1 py-0.5 text-xs border border-gray-300 rounded"
                                    placeholder="경도" step="0.01">
-                            <div class="col-span-3 flex flex-col space-y-0.5">
-                                <input type="range" id="search-radius" min="10" max="5000" step="10" value="1000" 
-                                       class="w-full cursor-pointer">
-                                <div class="text-[10px] text-gray-600 text-right pr-1">
-                                    <span id="search-radius-value">1000</span> km
-                                </div>
+                        </div>
+                        <div class="flex flex-col space-y-0.5">
+                            <input type="range" id="search-radius" min="10" max="10000" step="10" value="1000" 
+                                   class="w-full cursor-pointer">
+                            <div class="text-[10px] text-gray-600 text-right pr-1">
+                                <span id="search-radius-value">1000</span> km
                             </div>
                         </div>
                         <div class="flex space-x-1">
-                            <button id="radius-search-btn" class="flex-1 bg-green-600 hover:bg-green-700 text-white text-xs py-1 px-2 rounded">
+                            <button id="radius-search-btn" class="flex-1 primary text-xs py-1 px-2 rounded">
                                 검색
                             </button>
-                            <button id="radius-clear-btn" class="flex-1 bg-red-600 hover:bg-red-700 text-white text-xs py-1 px-2 rounded">
+                            <button id="radius-clear-btn" class="flex-1 text-xs py-1 px-2 rounded">
                                 초기화
                             </button>
                         </div>
@@ -100,45 +100,38 @@
                 </div>
 
                 <!-- 필터 설정 -->
-                <div class="bg-white rounded border border-gray-200 p-2">
-                    <h3 class="text-xs font-semibold text-gray-800 mb-1 flex items-center">
-                        <i class="fas fa-filter mr-1 text-purple-600 text-xs"></i>
-                        필터 설정
+                <div class="panel">
+                    <h3 class="panel-title">
+                        [필터] 설정
                     </h3>
                     <div class="space-y-1">
-                        <div class="grid grid-cols-2 gap-1">
-                            <input type="number" id="min-magnitude" 
-                                   class="w-full px-1 py-0.5 text-xs border border-gray-300 rounded"
-                                   min="0" max="10" step="0.1" value="0" placeholder="최소규모">
-                            <div class="col-span-2 flex flex-col space-y-0.5">
-                                <input type="range" id="max-count" min="100" max="5000" step="100" value="500" 
-                                       class="w-full cursor-pointer">
-                                <div class="text-[10px] text-gray-600 text-right pr-1">
-                                    <span id="max-count-value">500</span> 개
-                                </div>
+                        <div class="flex flex-col space-y-0.5">
+                            <input type="range" id="max-count" min="100" max="500" step="50" value="500" 
+                                   class="w-full cursor-pointer">
+                            <div class="text-[10px] text-gray-600 text-right pr-1">
+                                <span id="max-count-value">500</span> 개
                             </div>
                         </div>
-                        <button id="load-earthquakes-btn" class="w-full bg-purple-600 hover:bg-purple-700 text-white text-xs py-1 px-2 rounded">
+                        <button id="load-earthquakes-btn" class="w-full primary text-xs py-1 px-2 rounded">
                             지진 조회
                         </button>
                     </div>
                 </div>
 
                 <!-- 다각형 검색 -->
-                <div class="bg-white rounded border border-gray-200 p-2">
-                    <h3 class="text-xs font-semibold text-gray-800 mb-1 flex items-center">
-                        <i class="fas fa-draw-polygon mr-1 text-orange-600 text-xs"></i>
-                        다각형 검색
+                <div class="panel">
+                    <h3 class="panel-title">
+                        [다각형] 검색
                     </h3>
                     <div class="space-y-1">
                         <div class="grid grid-cols-3 gap-1">
-                            <button id="polygon-mode-btn" class="bg-gray-600 hover:bg-gray-700 text-white text-xs py-1 px-1 rounded">
+                            <button id="polygon-mode-btn" class="text-xs py-1 px-1 rounded">
                                 그리기
                             </button>
-                            <button id="polygon-search-btn" class="bg-orange-600 hover:bg-orange-700 text-white text-xs py-1 px-1 rounded disabled:bg-gray-400" disabled>
+                            <button id="polygon-search-btn" class="text-xs py-1 px-1 rounded disabled:bg-gray-400" disabled>
                                 검색
                             </button>
-                            <button id="polygon-clear-btn" class="bg-red-600 hover:bg-red-700 text-white text-xs py-1 px-1 rounded disabled:bg-gray-400" disabled>
+                            <button id="polygon-clear-btn" class="text-xs py-1 px-1 rounded disabled:bg-gray-400" disabled>
                                 삭제
                             </button>
                         </div>
@@ -146,9 +139,9 @@
                 </div>
 
                 <!-- 정보 패널 -->
-                <div class="bg-white rounded border border-gray-200 p-2 flex-1">
-                    <h3 class="text-xs font-semibold text-gray-800 mb-1 flex items-center">
-                        <i class="fas fa-info-circle mr-1 text-indigo-600 text-xs"></i>
+                <div class="panel flex-1">
+                    <h3 class="panel-title">
+                        <i class="fas fa-info-circle mr-1"></i>
                         상세 정보
                     </h3>
                     <div id="earthquake-info" class="text-xs text-gray-600">
@@ -164,24 +157,8 @@
         </div>
 
         <!-- 지도 영역 -->
-        <div class="flex-1 relative">
+        <div class="main-content flex-1 relative">
             <div id="map" class="w-full h-full"></div>
-            
-            <!-- 지도 컨트롤 오버레이 -->
-            <div class="absolute top-4 right-4 z-10 space-y-2">
-                <div class="bg-white rounded-lg shadow-lg p-2">
-                    <button class="w-10 h-10 bg-white hover:bg-gray-50 border border-gray-300 rounded-lg flex items-center justify-center transition-colors duration-200" 
-                            onclick="map.zoomIn()">
-                        <i class="fas fa-plus text-gray-600"></i>
-                    </button>
-                </div>
-                <div class="bg-white rounded-lg shadow-lg p-2">
-                    <button class="w-10 h-10 bg-white hover:bg-gray-50 border border-gray-300 rounded-lg flex items-center justify-center transition-colors duration-200" 
-                            onclick="map.zoomOut()">
-                        <i class="fas fa-minus text-gray-600"></i>
-                    </button>
-                </div>
-            </div>
         </div>
     </div>
 

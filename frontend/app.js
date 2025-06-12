@@ -27,6 +27,31 @@ function initMap() {
     
     // 지도 클릭 이벤트
     map.on('click', onMapClick);
+
+    // 축척(스케일) 컨트롤 추가 및 커스텀 div에 동기화
+    const scaleControl = L.control.scale({ position: 'bottomleft', imperial: false });
+    scaleControl.addTo(map);
+    // scaleControl은 내부적으로 .leaflet-control-scale-line을 사용하므로, 주기적으로 동기화
+    function updateScaleDiv() {
+        const scaleLine = document.querySelector('.leaflet-control-scale-line');
+        const scaleDiv = document.getElementById('map-scale');
+        if (scaleLine && scaleDiv) {
+            scaleDiv.textContent = scaleLine.textContent;
+        }
+    }
+    map.on('move zoom', updateScaleDiv);
+    setTimeout(updateScaleDiv, 500); // 초기화 후 한번 동기화
+    setInterval(updateScaleDiv, 1000); // 항상 동기화
+
+    // 마우스 좌표 표시
+    map.on('mousemove', function(e) {
+        const { lat, lng } = e.latlng;
+        document.getElementById('map-coords').textContent =
+            `Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`;
+    });
+    map.on('mouseout', function() {
+        document.getElementById('map-coords').textContent = '';
+    });
 }
 
 // 경도를 -180~180 범위로 정규화하는 함수
@@ -528,7 +553,6 @@ function hideSearchResults() {
 
 // API 호출 함수들
 async function loadEarthquakes() {
-    const minMagnitude = document.getElementById('min-magnitude').value || 0;
     const maxCount = document.getElementById('max-count').value || 1000;
     
     try {
@@ -537,7 +561,7 @@ async function loadEarthquakes() {
         // 기존 검색 마커 제거
         clearSearchMarkers();
         
-        const response = await fetch(`${API_BASE}/earthquakes?limit=${maxCount}&min_magnitude=${minMagnitude}`);
+        const response = await fetch(`${API_BASE}/earthquakes?limit=${maxCount}`);
         const earthquakes = await response.json();
         
         addEarthquakeMarkers(earthquakes);
@@ -622,8 +646,18 @@ async function radiusSearch() {
             }
         });
         
-        // 적절한 줌 레벨로 조정 (태평양 좌표로)
-        const zoomLevel = radius > 500 ? 5 : radius > 100 ? 7 : radius > 50 ? 8 : 10;
+        // 반경에 따라 더 넓은 영역은 더 낮은 줌레벨로
+        let zoomLevel;
+        if (radius >= 10000) zoomLevel = 1;
+        else if (radius >= 5000) zoomLevel = 2;
+        else if (radius >= 3500) zoomLevel = 3;
+        else if (radius >= 1500) zoomLevel = 4;
+        else if (radius >= 1000) zoomLevel = 4;
+        else if (radius >= 500) zoomLevel = 5;
+        else if (radius >= 300) zoomLevel = 6;
+        else if (radius >= 100) zoomLevel = 7;
+        else if (radius >= 50) zoomLevel = 8;
+        else zoomLevel = 10;
         map.setView([lat, pacificLon], zoomLevel);
         
         // 검색 결과 팝업 표시

@@ -1,6 +1,9 @@
 /* 지도 컨테이너 스타일 */
 #map {
     z-index: 0;
+    background: #e5e7eb;
+    width: 100%;
+    height: 100%;
 }
 
 /* 검색 결과 팝업 */
@@ -44,11 +47,11 @@
     background: #f1f5f9;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
+    background: #e5e7eb;
     border-radius: 2px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
+    background: #bdbdbd;
 }
 
 /* 로딩 애니메이션 */
@@ -66,6 +69,356 @@
     transition: all 0.3s ease;
 }
 .card-hover:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 0 0 2px #1976d2 !important;
+    background: #f0f7ff !important;
+}
+
+/* ===== Dark Professional Theme Overrides ===== */
+body {
+    background-color: #1f2937; /* slate-800 */
+    color: #d1d5db; /* gray-300 */
+    font-family: 'Inter', 'Fira Code', 'Segoe UI', Arial, sans-serif;
+    background: #f7f7fa;
+    font-size: 14px;
+}
+
+.bg-white {
+    background-color: #27303f !important; /* panel background */
+}
+
+.bg-gray-50 {
+    background-color: #1f2937 !important;
+}
+
+.border-gray-200 {
+    border-color: #3e4a5e !important;
+}
+
+.text-gray-800 {
+    color: #f3f4f6 !important;
+}
+.text-gray-700 {
+    color: #e5e7eb !important;
+}
+.text-gray-600 {
+    color: #9ca3af !important;
+}
+.text-gray-500 {
+    color: #6b7280 !important;
+}
+
+/* Button & accent colors (desaturated) */
+.bg-blue-600 { background-color: #334155 !important; }
+.bg-blue-700 { background-color: #1e293b !important; }
+.bg-green-600 { background-color: #3f6212 !important; }
+.bg-purple-600 { background-color: #4c1d95 !important; }
+.bg-orange-600 { background-color: #7c2d12 !important; }
+.bg-red-600 { background-color: #7f1d1d !important; }
+
+/* Hover variants */
+.bg-blue-700:hover, .hover\:bg-blue-700:hover { background-color: #1e40af !important; }
+.bg-gray-700:hover, .hover\:bg-gray-700:hover { background-color: #374151 !important; }
+.bg-green-700:hover, .hover\:bg-green-700:hover { background-color: #365314 !important; }
+.bg-purple-700:hover, .hover\:bg-purple-700:hover { background-color: #3b0764 !important; }
+.bg-orange-700:hover, .hover\:bg-orange-700:hover { background-color: #652b0e !important; }
+.bg-red-700:hover, .hover\:bg-red-700:hover { background-color: #641414 !important; }
+
+/* Gradient overrides */
+.from-blue-600 { --tw-gradient-from: #334155 !important; }
+.to-blue-700 { --tw-gradient-to: #1e293b !important; }
+
+/* ===== Light Professional Theme Overrides ===== */
+body {
+    background-color: #f3f4f6 !important; /* gray-100 */
+    color: #374151 !important; /* gray-700 */
+}
+
+.bg-gray-50, .bg-white {
+    background-color: #ffffff !important;
+}
+
+.border-gray-200 {
+    border-color: #d1d5db !important; /* gray-300 */
+}
+
+.text-gray-800 { color: #1f2937 !important; }
+.text-gray-700 { color: #374151 !important; }
+.text-gray-600 { color: #4b5563 !important; }
+.text-gray-500 { color: #6b7280 !important; }
+
+/* Neutral button palette */
+.bg-blue-600,
+.bg-green-600,
+.bg-purple-600,
+.bg-orange-600,
+.bg-red-600 {
+    background-color: #4b5563 !important; /* slate-600 */
+}
+
+.bg-blue-700,
+.bg-green-700,
+.bg-purple-700,
+.bg-orange-700,
+.bg-red-700 {
+    background-color: #374151 !important; /* slate-700 */
+}
+
+/* Hover (slightly darker) */
+.bg-blue-600:hover, .bg-green-600:hover, .bg-purple-600:hover, .bg-orange-600:hover, .bg-red-600:hover,
+.hover\:bg-blue-700:hover, .hover\:bg-gray-700:hover, .hover\:bg-green-700:hover, .hover\:bg-purple-700:hover, .hover\:bg-orange-700:hover, .hover\:bg-red-700:hover {
+    background-color: #1f2937 !important; /* slate-800 */
+}
+
+/* Gradient neutralization */
+.from-blue-600 { --tw-gradient-from: #4b5563 !important; }
+.to-blue-700 { --tw-gradient-to: #374151 !important; }
+
+/* ===== Geek Minimal Tweaks ===== */
+button, input, select {
+    border-radius: 2px !important;
+    box-shadow: none !important;
+    font-family: 'Fira Code', monospace;
+}
+
+.bg-slate-button {
+    background-color: #374151 !important;
+    color: #f9fafb !important;
+}
+
+button:hover {
+    opacity: 0.9 !important;
+}
+
+/* Panels */
+.rounded { border-radius: 4px !important; }
+.shadow-xl, .shadow-lg, .shadow-2xl { box-shadow: none !important; }
+
+/* ===== Geek Neutralization ===== */
+
+/* 슬라이더(blue→slate) */
+input[type=range]::-webkit-slider-thumb {
+    background: #374151 !important;
+    border: 1px solid #6b7280 !important;
+}
+input[type=range]::-webkit-slider-runnable-track {
+    background: #e5e7eb !important;
+}
+input[type=range] {
+    accent-color: #374151 !important;
+}
+
+/* 아이콘(색상→중성) */
+.fa-sync-alt, .fa-crosshairs, .fa-filter, .fa-draw-polygon, .fa-info-circle {
+    color: #6b7280 !important;
+}
+
+/* 강조 텍스트(주황/초록/빨강→중성) */
+.text-red-600, .text-orange-600, .text-green-600, .text-yellow-600 {
+    color: #374151 !important;
+    font-weight: 500 !important;
+}
+
+/* 버튼 텍스트도 중성 */
+button, .bg-slate-button {
+    color: #f3f4f6 !important;
+}
+
+/* 사이드바 헤더 배경도 중성 */
+.bg-gradient-to-r.from-blue-600.to-blue-700 {
+    background: #23272f !important;
+    background-image: none !important;
+}
+
+input[type=number] {
+    min-width: 0 !important;
+    width: 100% !important;
+}
+
+/* ===== 전문가용 툴 스타일 (ArcGIS/CARTO/IDE) ===== */
+.sidebar {
+    width: 260px;
+    background: #f7f7fa;
+    border-right: 1px solid #e5e7eb;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px 0;
+    min-height: 100vh;
+}
+.main-content {
+    flex: 1;
+    min-width: 0;
+    background: #e5e7eb;
+    position: relative;
+}
+.panel {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    padding: 16px;
+    margin-bottom: 8px;
+}
+.panel-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1976d2;
+    margin-bottom: 8px;
+}
+input, button, select {
+    border: 1px solid #e5e7eb;
+    border-radius: 3px;
+    background: #f7f7fa;
+    font-family: inherit;
+    font-size: 14px;
+    padding: 0 8px;
+    height: 32px;
+}
+input:focus, select:focus {
+    outline: 2px solid #1976d2;
+    background: #fff;
+}
+button {
+    background: #444;
+    color: #fff;
+    font-weight: 500;
+    transition: background 0.15s;
+    border: 1px solid #e5e7eb;
+}
+button.primary {
+    background: #1976d2;
+}
+button:hover {
+    background: #222;
+}
+button.primary:hover {
+    background: #145ea8;
+}
+/* 슬라이더 */
+input[type=range] {
+    accent-color: #1976d2;
+    height: 2px;
+    margin: 8px 0;
+}
+input[type=range]::-webkit-slider-thumb {
+    background: #1976d2;
+    border: 1px solid #e5e7eb;
+}
+input[type=range]::-webkit-slider-runnable-track {
+    background: #e5e7eb;
+}
+/* 카드/패널 그림자 제거 */
+.rounded, .panel {
+    border-radius: 4px !important;
+}
+.shadow-xl, .shadow-lg, .shadow-2xl {
+    box-shadow: none !important;
+}
+/* 아이콘 중성화 */
+.fa, .fas, .far, .fal, .fab {
+    color: #888 !important;
+}
+/* 강조 텍스트 */
+.text-red-600, .text-orange-600, .text-green-600, .text-yellow-600 {
+    color: #1976d2 !important;
+    font-weight: 600 !important;
+}
+/* 사이드바 헤더 */
+.bg-gradient-to-r.from-blue-600.to-blue-700 {
+    background: #1976d2 !important;
+    background-image: none !important;
+    color: #fff !important;
+}
+/* 기타 */
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #e5e7eb;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #bdbdbd;
+}
+.card-hover:hover {
+    box-shadow: 0 0 0 2px #1976d2 !important;
+    background: #f0f7ff !important;
+}
+/* 지도 컨테이너 */
+#map { background: #e5e7eb; }
+
+/* Panels */
+.rounded { border-radius: 4px !important; }
+.shadow-xl, .shadow-lg, .shadow-2xl { box-shadow: 0 0 0 1px #e5e7eb !important; }
+
+/* ===== Geek Neutralization ===== */
+
+/* 슬라이더(blue→slate) */
+input[type=range]::-webkit-slider-thumb {
+    background: #374151 !important;
+    border: 1px solid #6b7280 !important;
+}
+input[type=range]::-webkit-slider-runnable-track {
+    background: #e5e7eb !important;
+}
+input[type=range] {
+    accent-color: #374151 !important;
+}
+
+/* 아이콘(색상→중성) */
+.fa-sync-alt, .fa-crosshairs, .fa-filter, .fa-draw-polygon, .fa-info-circle {
+    color: #6b7280 !important;
+}
+
+/* 강조 텍스트(주황/초록/빨강→중성) */
+.text-red-600, .text-orange-600, .text-green-600, .text-yellow-600 {
+    color: #374151 !important;
+    font-weight: 500 !important;
+}
+
+/* 버튼 텍스트도 중성 */
+button, .bg-slate-button {
+    color: #f3f4f6 !important;
+}
+
+/* 사이드바 헤더 배경도 중성 */
+.bg-gradient-to-r.from-blue-600.to-blue-700 {
+    background: #23272f !important;
+    background-image: none !important;
+}
+
+input[type=number] {
+    min-width: 0 !important;
+    width: 100% !important;
+}
+
+/* Leaflet 줌 컨트롤 오른쪽 상단 이동 */
+.leaflet-top.leaflet-left {
+    right: 16px;
+    left: auto;
+}
+
+#map-scale, #map-coords {
+  pointer-events: none;
+  z-index: 1200 !important;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  color: #333;
+  min-width: 90px;
+  text-align: center;
+  font-size: 13px;
+  font-family: 'Fira Code', monospace;
+}
+
+/* Leaflet 기본 축척 컨트롤 투명/검정 */
+.leaflet-control-scale {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+.leaflet-control-scale-line {
+  background: transparent !important;
+  color: #111 !important;
+  border: none !important;
+  border-bottom: 1px solid #111 !important; /* 바(막대)만 남김 */
+  box-shadow: none !important;
+  font-size: 10px !important;
+  font-family: 'Fira Code', monospace;
+  font-weight: 500;
+  padding-bottom: 2px !important;
 } 
