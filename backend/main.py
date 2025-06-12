@@ -24,12 +24,27 @@ app.add_middleware(
 async def root():
     return {"message": "PostGIS Earthquake API"}
 
+@app.get("/api/status")
+async def api_status():
+    """API 상태 확인"""
+    return {"status": "healthy", "message": "PostGIS Earthquake API is running"}
+
 @app.get("/api/earthquakes", response_model=List[EarthquakeResponse])
 async def get_earthquakes(
     limit: Optional[int] = 100,
     min_magnitude: Optional[float] = None
 ):
     """전체 지진 목록 조회"""
+    with get_db() as db:
+        service = EarthquakeService(db)
+        return service.get_earthquakes(limit, min_magnitude)
+
+@app.get("/api/earthquakes/recent", response_model=List[EarthquakeResponse])
+async def get_recent_earthquakes(
+    limit: Optional[int] = 100,
+    min_magnitude: Optional[float] = None
+):
+    """최근 지진 목록 조회 (get_earthquakes와 동일)"""
     with get_db() as db:
         service = EarthquakeService(db)
         return service.get_earthquakes(limit, min_magnitude)
