@@ -19,8 +19,9 @@ services:
       - key: USGS_API_BASE_URL
         value: https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary
 
-  - type: static
+  - type: web
     name: seismic-frontend
+    runtime: static
     buildCommand: "echo 'No build needed for static files'"
     staticPublishPath: ./frontend
     plan: free 
