@@ -29,6 +29,44 @@ async def api_status():
     """API 상태 확인"""
     return {"status": "healthy", "message": "PostGIS Earthquake API is running"}
 
+@app.post("/api/init-database")
+async def init_database():
+    """데이터베이스 테이블 및 확장 초기화"""
+    try:
+        with get_db() as db:
+            with db.cursor() as cursor:
+                # PostGIS 확장 활성화
+                cursor.execute("CREATE EXTENSION IF NOT EXISTS postgis;")
+                cursor.execute("CREATE EXTENSION IF NOT EXISTS postgis_topology;")
+                
+                # 지진 데이터 테이블 생성
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS earthquakes (
+                        id VARCHAR(50) PRIMARY KEY,
+                        magnitude DECIMAL(5,2),
+                        place VARCHAR(500),
+                        time TIMESTAMP WITH TIME ZONE,
+                        updated TIMESTAMP WITH TIME ZONE,
+                        depth DECIMAL(6,2),
+                        location GEOGRAPHY(POINT, 4326),
+                        url TEXT,
+                        detail TEXT,
+                        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+                    );
+                """)
+                
+                # 인덱스 생성
+                cursor.execute("CREATE INDEX IF NOT EXISTS idx_earthquakes_location ON earthquakes USING GIST(location);")
+                cursor.execute("CREATE INDEX IF NOT EXISTS idx_earthquakes_time ON earthquakes(time);")
+                cursor.execute("CREATE INDEX IF NOT EXISTS idx_earthquakes_magnitude ON earthquakes(magnitude);")
+                cursor.execute("CREATE INDEX IF NOT EXISTS idx_earthquakes_depth ON earthquakes(depth);")
+                
+                db.commit()
+                
+        return {"message": "데이터베이스 초기화 완료", "status": "success"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"데이터베이스 초기화 실패: {str(e)}")
+
 @app.get("/api/earthquakes", response_model=List[EarthquakeResponse])
 async def get_earthquakes(
     limit: Optional[int] = 100,
