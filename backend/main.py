@@ -20,6 +20,45 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# 애플리케이션 시작 시 데이터베이스 초기화
+@app.on_event("startup")
+async def startup_event():
+    """애플리케이션 시작 시 데이터베이스 초기화"""
+    try:
+        print("데이터베이스 초기화 시작...")
+        with get_db() as db:
+            with db.cursor() as cursor:
+                # PostGIS 확장 활성화
+                cursor.execute("CREATE EXTENSION IF NOT EXISTS postgis;")
+                cursor.execute("CREATE EXTENSION IF NOT EXISTS postgis_topology;")
+                
+                # 지진 데이터 테이블 생성
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS earthquakes (
+                        id VARCHAR(50) PRIMARY KEY,
+                        magnitude DECIMAL(5,2),
+                        place VARCHAR(500),
+                        time TIMESTAMP WITH TIME ZONE,
+                        updated TIMESTAMP WITH TIME ZONE,
+                        depth DECIMAL(6,2),
+                        location GEOGRAPHY(POINT, 4326),
+                        url TEXT,
+                        detail TEXT,
+                        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+                    );
+                """)
+                
+                # 인덱스 생성
+                cursor.execute("CREATE INDEX IF NOT EXISTS idx_earthquakes_location ON earthquakes USING GIST(location);")
+                cursor.execute("CREATE INDEX IF NOT EXISTS idx_earthquakes_time ON earthquakes(time);")
+                cursor.execute("CREATE INDEX IF NOT EXISTS idx_earthquakes_magnitude ON earthquakes(magnitude);")
+                cursor.execute("CREATE INDEX IF NOT EXISTS idx_earthquakes_depth ON earthquakes(depth);")
+                
+                db.commit()
+                print("데이터베이스 초기화 완료!")
+    except Exception as e:
+        print(f"데이터베이스 초기화 오류: {str(e)}")
+
 @app.get("/")
 async def root():
     return {"message": "PostGIS Earthquake API"}
