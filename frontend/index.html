@@ -32,79 +32,8 @@
         }
     </script>
     
-    <style>
-        /* 지도 컨테이너 스타일 */
-        #map {
-            z-index: 0;
-        }
-        
-        /* 검색 결과 팝업 */
-        .search-popup {
-            z-index: 1000;
-        }
-        
-        /* 컴팩트 팝업 스타일 */
-        .compact-popup .leaflet-popup-content-wrapper {
-            border-radius: 2px !important;
-            padding: 0 !important;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
-            border: 1px solid #ccc !important;
-        }
-        
-        .compact-popup .leaflet-popup-content {
-            margin: 0 !important;
-            padding: 0 !important;
-            min-height: auto !important;
-        }
-        
-        .compact-popup .leaflet-popup-tip {
-            border-radius: 0 !important;
-        }
-        
-        .compact-popup .leaflet-popup-close-button {
-            top: 2px !important;
-            right: 2px !important;
-            width: 16px !important;
-            height: 16px !important;
-            font-size: 12px !important;
-            line-height: 14px !important;
-            color: #666 !important;
-        }
-        
-        /* 스크롤바 스타일 */
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 2px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-        
-        /* 로딩 애니메이션 */
-        .loading-spinner {
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        
-        /* 카드 호버 효과 */
-        .card-hover {
-            transition: all 0.3s ease;
-        }
-        .card-hover:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
-    </style>
+    <!-- 커스텀 스타일 -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-gray-50 font-sans antialiased">
     <!-- 메인 컨테이너 -->
