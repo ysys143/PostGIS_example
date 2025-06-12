@@ -245,6 +245,7 @@ function addEarthquakeMarkers(earthquakes) {
         
         // 클릭 이벤트
         marker.on('click', () => {
+            console.log('지진 마커 클릭됨:', eq.id, eq.magnitude);
             showEarthquakeInfo(eq);
         });
         
@@ -346,16 +347,17 @@ function showCenterMarker(lat, displayLon, originalLon) {
 
 // 지진 정보 표시
 function showEarthquakeInfo(earthquake) {
+    console.log('showEarthquakeInfo 호출됨:', earthquake.id);
     const infoDiv = document.getElementById('earthquake-info');
     infoDiv.innerHTML = `
-        <h4>지진 정보</h4>
-        <p><strong>ID:</strong> ${earthquake.id}</p>
-        <p><strong>규모:</strong> ${earthquake.magnitude || '알 수 없음'}</p>
-        <p><strong>위치:</strong> ${earthquake.place || '알 수 없음'}</p>
-        <p><strong>좌표:</strong> ${earthquake.latitude?.toFixed(4)}, ${earthquake.longitude?.toFixed(4)}</p>
-        <p><strong>깊이:</strong> ${earthquake.depth ? earthquake.depth + 'km' : '알 수 없음'}</p>
-        <p><strong>시간:</strong> ${earthquake.time ? new Date(earthquake.time).toLocaleString('ko-KR') : '알 수 없음'}</p>
-        ${earthquake.distance_km ? `<p><strong>거리:</strong> ${earthquake.distance_km}km</p>` : ''}
+        <h4>SEISMIC_EVENT_DATA</h4>
+        <p><strong>EVENT_ID:</strong> ${earthquake.id}</p>
+        <p><strong>MAGNITUDE:</strong> ${earthquake.magnitude || 'UNKNOWN'}</p>
+        <p><strong>LOCATION:</strong> ${earthquake.place || 'UNKNOWN'}</p>
+        <p><strong>COORDINATES:</strong> ${earthquake.latitude?.toFixed(4)}, ${earthquake.longitude?.toFixed(4)}</p>
+        <p><strong>DEPTH_KM:</strong> ${earthquake.depth ? earthquake.depth : 'UNKNOWN'}</p>
+        <p><strong>TIMESTAMP:</strong> ${earthquake.time ? new Date(earthquake.time).toISOString() : 'UNKNOWN'}</p>
+        ${earthquake.distance_km ? `<p><strong>DISTANCE_KM:</strong> ${earthquake.distance_km}</p>` : ''}
     `;
 }
 
@@ -439,10 +441,10 @@ async function loadEarthquakes() {
         const earthquakes = await response.json();
         
         addEarthquakeMarkers(earthquakes);
-        alert(`${earthquakes.length}개 지진 데이터를 로드했습니다.`);
+        alert(`DATA_LOADED: ${earthquakes.length} SEISMIC_EVENTS`);
     } catch (error) {
         console.error('Error loading earthquakes:', error);
-        alert('지진 데이터 로드 실패');
+        alert('ERROR: SEISMIC_DATA_LOAD_FAILED');
     } finally {
         hideLoading('load-earthquakes-btn');
     }
@@ -453,10 +455,10 @@ async function syncData() {
         showLoading('sync-btn');
         const response = await fetch(`${API_BASE}/earthquakes/sync`);
         const result = await response.json();
-        alert(result.message);
+        alert(`SYNC_STATUS: ${result.message}`);
     } catch (error) {
         console.error('Error syncing data:', error);
-        alert('데이터 동기화 실패');
+        alert('ERROR: DATA_SYNC_FAILED');
     } finally {
         hideLoading('sync-btn');
     }
@@ -468,18 +470,18 @@ async function radiusSearch() {
     const radius = parseFloat(document.getElementById('search-radius').value);
     
     if (!lat || !lon || !radius) {
-        alert('위도, 경도, 반경을 모두 입력해주세요.');
+        alert('ERROR: INCOMPLETE_COORDINATES');
         return;
     }
     
     // 좌표 유효성 검사
     if (lat < -90 || lat > 90) {
-        alert('위도는 -90 ~ 90 범위여야 합니다.');
+        alert('ERROR: LATITUDE_OUT_OF_RANGE [-90,90]');
         return;
     }
     
     if (lon < -180 || lon > 180) {
-        alert('경도는 -180 ~ 180 범위여야 합니다.');
+        alert('ERROR: LONGITUDE_OUT_OF_RANGE [-180,180]');
         return;
     }
     
@@ -518,10 +520,10 @@ async function radiusSearch() {
         // 검색 결과 팝업 표시
         showSearchResults(earthquakes, `반경 ${radius}km 검색`);
         
-        alert(`반경 ${radius}km 내에서 ${earthquakes.length}개 지진을 발견했습니다.`);
+        alert(`RADIUS_SEARCH_RESULT: ${earthquakes.length} EVENTS IN ${radius}KM`);
     } catch (error) {
         console.error('Error in radius search:', error);
-        alert('반경 검색 실패');
+        alert('ERROR: RADIUS_SEARCH_FAILED');
     } finally {
         hideLoading('radius-search-btn');
     }
@@ -529,7 +531,7 @@ async function radiusSearch() {
 
 async function polygonSearch() {
     if (!currentPolygon || polygonPoints.length < 3) {
-        alert('다각형을 먼저 그려주세요.');
+        alert('ERROR: POLYGON_NOT_DEFINED');
         return;
     }
     
@@ -557,10 +559,10 @@ async function polygonSearch() {
         // 검색 결과 팝업 표시
         showSearchResults(earthquakes, '다각형 영역 검색');
         
-        alert(`다각형 영역 내에서 ${earthquakes.length}개 지진을 발견했습니다.`);
+        alert(`POLYGON_SEARCH_RESULT: ${earthquakes.length} EVENTS DETECTED`);
     } catch (error) {
         console.error('Error in polygon search:', error);
-        alert('지역 검색 실패');
+        alert('ERROR: POLYGON_SEARCH_FAILED');
     } finally {
         hideLoading('polygon-search-btn');
     }
@@ -582,7 +584,7 @@ async function showStats() {
         createMagnitudeChart(stats);
     } catch (error) {
         console.error('Error loading stats:', error);
-        alert('통계 로드 실패');
+        alert('ERROR: STATS_LOAD_FAILED');
     }
 }
 
@@ -619,12 +621,12 @@ function togglePolygonMode() {
     const btn = document.getElementById('polygon-mode-btn');
     
     if (isPolygonMode) {
-        btn.textContent = '다각형 완료';
+        btn.textContent = 'COMPLETE_POLYGON';
         btn.classList.add('btn-primary');
         btn.classList.remove('btn-secondary');
         map.getContainer().style.cursor = 'crosshair';
     } else {
-        btn.textContent = '다각형 그리기';
+        btn.textContent = 'DRAW_POLYGON';
         btn.classList.add('btn-secondary');
         btn.classList.remove('btn-primary');
         map.getContainer().style.cursor = '';
