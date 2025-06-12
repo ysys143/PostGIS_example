@@ -1,0 +1,65 @@
+---
+description: Code writing, refactoring, code reviews, naming conventions, Python/FastAPI coding standards, and development best practices
+globs: 
+alwaysApply: false
+---
+# Fast Development Conventions
+
+**Principle: Prioritize speed and directness while maintaining system coherence**
+
+## **Core Approach**
+- Choose the most direct solution that solves the actual problem
+- Focus on working functionality first, optimization later
+- Address root causes, not just symptoms
+- Consider system integration when making changes
+
+## **Code Standards**
+- Follow PEP 8 for basic readability
+- Use type hints for function parameters and return values
+- Write clear, simple code over complex abstractions
+
+## **Data Models**
+- Use Pydantic BaseModel for API requests/responses with essential validation
+- Use SQLModel for database entities with necessary fields only
+- Add relationships only when actually needed
+
+## **Architecture**
+- Create repositories only for complex data operations
+- Keep services simple and focused on business logic
+- Use direct error handling with HTTPException
+- Implement minimal dependency injection
+
+## **Database**
+- Use SQLAlchemy async sessions
+- Simple database configuration without over-engineering
+- Direct queries when repositories aren't needed
+
+## **API Routes**
+- Use FastAPI APIRouter with clear endpoint definitions
+- Handle errors directly with appropriate HTTP status codes
+- Focus on core functionality without extensive middleware
+
+## **Testing**
+- Write tests for core functionality
+- Use pytest for async testing
+- Test both unit and integration levels when needed
+
+## **Quality**
+- Use type hints for clarity
+- Add comments for non-obvious logic
+- Keep functions focused and small
+- Run basic linting before commits
+
+## **Security**
+- Validate all inputs using Pydantic
+- Use environment variables for secrets
+- Log errors without exposing sensitive data
+
+## **When to Add Complexity**
+Add abstractions only when:
+- Multiple data sources are involved
+- Complex business logic requires isolation
+- Code reuse becomes beneficial
+- Testing becomes difficult
+
+**Start simple, add complexity only when the system demands it.**

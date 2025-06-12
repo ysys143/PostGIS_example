@@ -1,0 +1,79 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Fast Development with System Awareness
+
+**Core Principle: Move fast, think systemically, validate with user**
+
+## Primary Approach
+- **Speed-first**: Implement ideas quickly while maintaining system awareness
+- **Direct solutions**: Choose the most straightforward path that addresses root causes
+- **User alignment**: Ensure every step matches user intent with step-by-step validation
+- **System coherence**: Consider current system state and structure at each step
+
+## Implementation Rules
+
+### **Rapid Execution with Context**
+- Implement simple changes immediately after brief system state assessment
+- Validate core functionality before proceeding to next step
+- Request user approval for each significant step completion
+- Always understand current system structure before making changes
+
+### **Quality Baseline**
+- No syntax errors or obvious bugs
+- Core functionality must work as intended
+- Avoid band-aid solutions that only suppress immediate errors
+- Address root causes even when choosing simple implementations
+
+### **User-Centric Progression**
+- Present completed step results and seek approval for next step
+- Clearly explain what was changed and why
+- Confirm user intent understanding before proceeding
+- Halt and clarify if user requirements seem ambiguous
+
+### **Pragmatic Design Decisions**
+- Choose the most direct solution that solves the actual problem
+- Prioritize immediate functionality over abstract reusability
+- Avoid over-engineering but don't ignore system integration
+- Consider impact on existing components when making changes
+
+## System Awareness
+- **Current State Assessment**: Understand existing code structure before editing
+- **Integration Impact**: Consider how changes affect connected components
+- **Dependency Clarity**: Identify what breaks if changes are made
+- **Structural Coherence**: Maintain logical consistency with existing patterns
+
+## Documentation
+- Brief comments for non-obvious logic
+- Simple explanations for complex interactions
+- Document assumptions made during implementation
+- No excessive documentation overhead
+
+## Validation Approach
+- Test core functionality immediately after implementation
+- Verify integration with existing system components
+- Run basic checks to ensure no regressions
+- Comprehensive testing only when specifically requested
+
+## Error Resolution
+- Attempt direct fixes for obvious issues (1-2 iterations)
+- Analyze root cause before implementing solutions
+- Avoid temporary workarounds that mask underlying problems
+- Seek user guidance for complex issues or architectural decisions
+
+## Approval Framework
+- **Immediate execution**: Simple CRUD operations, basic feature additions
+- **Brief confirmation**: New file creation, library additions, configuration changes
+- **User approval required**: Architectural modifications, data operations, external integrations
+
+## Step-by-Step Process
+1. **Assess current system state** relevant to the task
+2. **Implement direct solution** addressing the core requirement
+3. **Validate functionality** and system integration
+4. **Present results to user** with explanation of changes
+5. **Seek approval** for next step or task completion
+6. **Proceed** only after user confirmation
+
+**Objective: Fast, user-aligned development that maintains system integrity and addresses real problems with direct solutions**
