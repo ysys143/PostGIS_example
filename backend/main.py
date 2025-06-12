@@ -20,44 +20,71 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# 데이터베이스 초기화 함수
+def init_database_tables():
+    """데이터베이스 테이블 및 확장 초기화"""
+    try:
+        print("데이터베이스 초기화 시작...")
+        import os
+        import psycopg2
+        
+        # 환경변수에서 DATABASE_URL 가져오기
+        database_url = os.getenv("DATABASE_URL")
+        if not database_url:
+            print("DATABASE_URL 환경변수가 설정되지 않음")
+            return False
+            
+        print(f"데이터베이스 연결 시도: {database_url[:50]}...")
+        
+        # 직접 데이터베이스 연결
+        conn = psycopg2.connect(database_url)
+        conn.autocommit = True
+        
+        with conn.cursor() as cursor:
+            # PostGIS 확장 활성화
+            print("PostGIS 확장 설치 중...")
+            cursor.execute("CREATE EXTENSION IF NOT EXISTS postgis;")
+            cursor.execute("CREATE EXTENSION IF NOT EXISTS postgis_topology;")
+            
+            # 지진 데이터 테이블 생성
+            print("earthquakes 테이블 생성 중...")
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS earthquakes (
+                    id VARCHAR(50) PRIMARY KEY,
+                    magnitude DECIMAL(5,2),
+                    place VARCHAR(500),
+                    time TIMESTAMP WITH TIME ZONE,
+                    updated TIMESTAMP WITH TIME ZONE,
+                    depth DECIMAL(6,2),
+                    location GEOGRAPHY(POINT, 4326),
+                    url TEXT,
+                    detail TEXT,
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+                );
+            """)
+            
+            # 인덱스 생성
+            print("인덱스 생성 중...")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_earthquakes_location ON earthquakes USING GIST(location);")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_earthquakes_time ON earthquakes(time);")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_earthquakes_magnitude ON earthquakes(magnitude);")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_earthquakes_depth ON earthquakes(depth);")
+            
+        conn.close()
+        print("데이터베이스 초기화 완료!")
+        return True
+        
+    except Exception as e:
+        print(f"데이터베이스 초기화 오류: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return False
+
 # 애플리케이션 시작 시 데이터베이스 초기화
 @app.on_event("startup")
 async def startup_event():
     """애플리케이션 시작 시 데이터베이스 초기화"""
-    try:
-        print("데이터베이스 초기화 시작...")
-        with get_db() as db:
-            with db.cursor() as cursor:
-                # PostGIS 확장 활성화
-                cursor.execute("CREATE EXTENSION IF NOT EXISTS postgis;")
-                cursor.execute("CREATE EXTENSION IF NOT EXISTS postgis_topology;")
-                
-                # 지진 데이터 테이블 생성
-                cursor.execute("""
-                    CREATE TABLE IF NOT EXISTS earthquakes (
-                        id VARCHAR(50) PRIMARY KEY,
-                        magnitude DECIMAL(5,2),
-                        place VARCHAR(500),
-                        time TIMESTAMP WITH TIME ZONE,
-                        updated TIMESTAMP WITH TIME ZONE,
-                        depth DECIMAL(6,2),
-                        location GEOGRAPHY(POINT, 4326),
-                        url TEXT,
-                        detail TEXT,
-                        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-                    );
-                """)
-                
-                # 인덱스 생성
-                cursor.execute("CREATE INDEX IF NOT EXISTS idx_earthquakes_location ON earthquakes USING GIST(location);")
-                cursor.execute("CREATE INDEX IF NOT EXISTS idx_earthquakes_time ON earthquakes(time);")
-                cursor.execute("CREATE INDEX IF NOT EXISTS idx_earthquakes_magnitude ON earthquakes(magnitude);")
-                cursor.execute("CREATE INDEX IF NOT EXISTS idx_earthquakes_depth ON earthquakes(depth);")
-                
-                db.commit()
-                print("데이터베이스 초기화 완료!")
-    except Exception as e:
-        print(f"데이터베이스 초기화 오류: {str(e)}")
+    init_database_tables()
 
 @app.get("/")
 async def root():
@@ -71,40 +98,11 @@ async def api_status():
 @app.post("/api/init-database")
 async def init_database():
     """데이터베이스 테이블 및 확장 초기화"""
-    try:
-        with get_db() as db:
-            with db.cursor() as cursor:
-                # PostGIS 확장 활성화
-                cursor.execute("CREATE EXTENSION IF NOT EXISTS postgis;")
-                cursor.execute("CREATE EXTENSION IF NOT EXISTS postgis_topology;")
-                
-                # 지진 데이터 테이블 생성
-                cursor.execute("""
-                    CREATE TABLE IF NOT EXISTS earthquakes (
-                        id VARCHAR(50) PRIMARY KEY,
-                        magnitude DECIMAL(5,2),
-                        place VARCHAR(500),
-                        time TIMESTAMP WITH TIME ZONE,
-                        updated TIMESTAMP WITH TIME ZONE,
-                        depth DECIMAL(6,2),
-                        location GEOGRAPHY(POINT, 4326),
-                        url TEXT,
-                        detail TEXT,
-                        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-                    );
-                """)
-                
-                # 인덱스 생성
-                cursor.execute("CREATE INDEX IF NOT EXISTS idx_earthquakes_location ON earthquakes USING GIST(location);")
-                cursor.execute("CREATE INDEX IF NOT EXISTS idx_earthquakes_time ON earthquakes(time);")
-                cursor.execute("CREATE INDEX IF NOT EXISTS idx_earthquakes_magnitude ON earthquakes(magnitude);")
-                cursor.execute("CREATE INDEX IF NOT EXISTS idx_earthquakes_depth ON earthquakes(depth);")
-                
-                db.commit()
-                
+    success = init_database_tables()
+    if success:
         return {"message": "데이터베이스 초기화 완료", "status": "success"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"데이터베이스 초기화 실패: {str(e)}")
+    else:
+        raise HTTPException(status_code=500, detail="데이터베이스 초기화 실패")
 
 @app.get("/api/earthquakes", response_model=List[EarthquakeResponse])
 async def get_earthquakes(
