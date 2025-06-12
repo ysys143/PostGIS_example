@@ -1,7 +1,7 @@
 databases:
   - name: postgis-db
     databaseName: postgis_sample
-    user: postgres
+    user: seismic_user
     plan: free
 
 services:
